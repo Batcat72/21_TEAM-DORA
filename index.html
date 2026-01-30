@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DORA OSINT Tool</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+/* ================= BASE ================= */
+body {
+  background: #1a1e23;
+  color: #eee;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 900px;
+  margin-top: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* ================= AUTO GLITCH TITLE (UIVERSE STYLE) ================= */
+.glitch-auto {
+  position: relative;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: white;
+  font-family:
+    "Fira Code",            /* hacker coder style */
+    "Orbitron",             /* sci-fi tech look */
+    "VT323",                /* retro terminal vibe */
+    "Courier New",          /* fallback classic */
+    monospace;
+}
+
+.glitch-auto::after {
+  --move1: inset(50% 50% 50% 50%);
+  --move2: inset(31% 0 40% 0);
+  --move3: inset(39% 0 15% 0);
+  --move4: inset(45% 0 40% 0);
+  --move5: inset(45% 0 6% 0);
+  --move6: inset(14% 0 61% 0);
+
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  clip-path: var(--move1);
+  animation: glitch_auto 0.8s infinite steps(2, end);
+  text-shadow:
+    -3px -3px 0px #0084ff,
+     3px  3px 0px #f80000;
+  pointer-events: none;
+}
+
+@keyframes glitch_auto {
+  0%   { clip-path: var(--move1); transform: translate(0); }
+  10%  { clip-path: var(--move2); transform: translate(-6px, 4px); }
+  20%  { clip-path: var(--move3); transform: translate(6px, -4px); }
+  30%  { clip-path: var(--move4); transform: translate(-6px, 4px); }
+  40%  { clip-path: var(--move5); transform: translate(6px, -4px); }
+  50%  { clip-path: var(--move6); transform: translate(-6px, 4px); }
+  60%  { clip-path: var(--move1); transform: translate(6px, -4px); }
+  100% { clip-path: var(--move1); transform: translate(0); }
+}
+
+/* ================= NAVBAR GLITCH HOVER ================= */
+.navbar .nav-link {
+  position: relative;
+  padding: 8px 12px;
+  color: #fff;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.navbar .nav-link::after {
+  --slice-0: inset(50% 50% 50% 50%);
+  --slice-1: inset(80% -6px 0 0);
+  --slice-2: inset(50% -6px 30% 0);
+  --slice-3: inset(10% -6px 85% 0);
+  --slice-4: inset(40% -6px 43% 0);
+  --slice-5: inset(80% -6px 5% 0);
+
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 3%,
+    #00e6f6 3%,
+    #00e6f6 5%,
+    #ff0101 5%
+  );
+  text-shadow: -2px -2px 0px #f8f005, 2px 2px 0px #00e6f6;
+  clip-path: var(--slice-0);
+  pointer-events: none;
+}
+
+.navbar .nav-link:hover::after {
+  animation: glitch 0.5s steps(2, end);
+}
+
+@keyframes glitch {
+  0% { clip-path: var(--slice-1); transform: translate(-6px,-3px); }
+  20% { clip-path: var(--slice-3); transform: translate(4px,3px); }
+  40% { clip-path: var(--slice-2); transform: translate(-3px,0); }
+  60% { clip-path: var(--slice-4); transform: translate(3px,3px); }
+  80% { clip-path: var(--slice-5); transform: translate(6px,-3px); }
+  100% { clip-path: var(--slice-1); transform: translate(0); }
+}
+
+/* ================= BUBBLES ================= */
+.bubbles {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -150px;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.15);
+  animation: float-up linear infinite;
+}
+
+.bubble::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background: rgba(255, 0, 0, 0.8);
+  animation: sway ease-in-out infinite alternate;
+}
+
+@keyframes float-up { to { transform: translateY(-120vh); } }
+@keyframes sway { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+
+.bubble:nth-child(1){width:40px;height:40px;left:10%;animation-duration:14s}
+.bubble:nth-child(2){width:60px;height:60px;left:25%;animation-duration:18s}
+.bubble:nth-child(3){width:30px;height:30px;left:40%;animation-duration:12s}
+.bubble:nth-child(4){width:50px;height:50px;left:60%;animation-duration:20s}
+.bubble:nth-child(5){width:35px;height:35px;left:75%;animation-duration:15s}
+.bubble:nth-child(6){width:70px;height:70px;left:90%;animation-duration:22s}
+
+/* ================= UIVERSE BUTTON (UNTOUCHED) ================= */
+.uiverse-btn {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:.45em .65em;
+  background:rgba(120,220,255,.25);
+  cursor:pointer;
+  box-shadow:3px 4px 0 black;
+  border:3px solid black;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:600;
+  transition:.1.5s;
+  position:relative;
+  overflow:hidden;
+}
+
+.uiverse-btn:hover {
+  transform:translate(1px,1px);
+  box-shadow:2px 3px 0 black;
+}
+
+.uiverse-btn::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:#ff0000;
+  z-index:-1;
+  transform:translateX(-100%);
+  transition:.25s ease;
+}
+
+.uiverse-btn:hover::after { transform:translateX(0); }
+
+.bgContainer span {
+  transform:translateX(-120%);
+  transition:.25s ease;
+  display:inline-block;
+}
+
+.uiverse-btn:hover .bgContainer span { transform:translateX(0); }
+
+.arrowContainer {
+  width:26px;
+  height:26px;
+  border:3px solid black;
+  border-radius:50%;
+  background:#ff0000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.2s;
+}
+
+.uiverse-btn:hover .arrowContainer { transform:translateX(4px); }
+</style>
+</head>
+
+<body>
+
+<div class="bubbles">
+  <span class="bubble"></span><span class="bubble"></span><span class="bubble"></span>
+  <span class="bubble"></span><span class="bubble"></span><span class="bubble"></span>
+</div>
+
+<div class="container">
+<h2 class="glitch-auto text-center mb-4" data-text="DORA OSINT Tool">
+  DORA OSINT Tool
+</h2>
+
+<nav class="navbar navbar-dark bg-dark mb-4 rounded">
+  <ul class="navbar-nav flex-row gap-4 ms-auto me-auto">
+    <li><a class="nav-link active" data-text="Social" onclick="showSection('social',this)">Social</a></li>
+    <li><a class="nav-link" data-text="OpenAI" onclick="showSection('openai',this)">OpenAI</a></li>
+    <li><a class="nav-link" data-text="Censys" onclick="showSection('censys',this)">Censys</a></li>
+    <li><a class="nav-link" data-text="Phone" onclick="showSection('phone',this)">Phone</a></li>
+    <li><a class="nav-link" data-text="Blockchain" onclick="showSection('blockchain',this)">Blockchain</a></li>
+    <li><a class="nav-link" data-text="VirusTotal" onclick="showSection('virustotal',this)">VirusTotal</a></li>
+  </ul>
+</nav>
+
+<div id="social" class="section active card bg-dark text-light p-4">
+  <h5>Social Media Scraper</h5>
+  <input id="social-input" class="form-control mb-3" placeholder="Enter username">
+  <button class="uiverse-btn" onclick="scrapeSocial()"><div class="bgContainer"><span>Scrape</span></div><div class="arrowContainer">→</div></button>
+  <div id="social-result" class="mt-3" style="white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+
+<div id="openai" class="section card bg-dark text-light p-4">
+  <h5>OpenAI Query</h5>
+  <textarea id="openai-input" class="form-control mb-3" placeholder="Enter your prompt"></textarea>
+  <button class="uiverse-btn" onclick="queryOpenAI()"><div class="bgContainer"><span>Query</span></div><div class="arrowContainer">→</div></button>
+  <div id="openai-result" class="mt-3" style="white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+
+<div id="censys" class="section card bg-dark text-light p-4">
+  <h5>Censys Search</h5>
+  <input id="censys-input" class="form-control mb-3" placeholder="Enter query">
+  <button class="uiverse-btn" onclick="searchCensys()"><div class="bgContainer"><span>Search</span></div><div class="arrowContainer">→</div></button>
+  <div id="censys-result" class="mt-3" style="white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+
+<div id="phone" class="section card bg-dark text-light p-4">
+  <h5>Phone Lookup</h5>
+  <input id="phone-input" class="form-control mb-3" placeholder="Enter phone number">
+  <button class="uiverse-btn" onclick="lookupPhone()"><div class="bgContainer"><span>Lookup</span></div><div class="arrowContainer">→</div></button>
+  <div id="phone-result" class="mt-3" style="white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+
+<div id="blockchain" class="section card bg-dark text-light p-4">
+  <h5>Blockchain Tracker</h5>
+  <select id="blockchain-network" class="form-control mb-3">
+    <option value="1">Bitcoin</option>
+    <option value="2">Ethereum</option>
+  </select>
+  <input id="blockchain-address" class="form-control mb-3" placeholder="Enter address">
+  <button class="uiverse-btn" onclick="trackBlockchain()"><div class="bgContainer"><span>Track</span></div><div class="arrowContainer">→</div></button>
+  <div id="blockchain-result" class="mt-3" style="white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+
+<div id="virustotal" class="section card bg-dark text-light p-4">
+  <h5>VirusTotal Scan</h5>
+  <input id="virustotal-filepath" class="form-control mb-3" placeholder="Enter file path">
+  <button class="uiverse-btn" onclick="scanVirusTotal()"><div class="bgContainer"><span>Scan</span></div><div class="arrowContainer">→</div></button>
+  <div id="virustotal-result" class="mt-3" style="white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+</div>
+
+<script>
+function showSection(id, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function scrapeSocial() {
+  const username = document.getElementById('social-input').value;
+  if (!username) { alert('Please enter a username'); return; }
+  const response = await fetch('/scrape_social_media', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, plain: true })
+  });
+  const result = await response.text();
+  document.getElementById('social-result').innerText = result;
+}
+
+async function queryOpenAI() {
+  const prompt = document.getElementById('openai-input').value;
+  if (!prompt) { alert('Please enter a prompt'); return; }
+  const response = await fetch('/openai_query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt, plain: true })
+  });
+  const result = await response.text();
+  document.getElementById('openai-result').innerText = result;
+}
+
+async function searchCensys() {
+  const query = document.getElementById('censys-input').value;
+  if (!query) { alert('Please enter a query'); return; }
+  const response = await fetch('/censys_search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, plain: true })
+  });
+  const result = await response.text();
+  document.getElementById('censys-result').innerText = result;
+}
+
+async function phoneLookup() {
+            const number = document.getElementById('number').value;
+            if (!number) { alert('Please enter a phone number'); return; }
+            const result = await postData('/phone_lookup', { number, plain: true });
+            displayResult(result);
+        }
+
+async function trackBlockchain() {
+  const network = document.getElementById('blockchain-network').value;
+  const address = document.getElementById('blockchain-address').value;
+  if (!address) { alert('Please enter an address'); return; }
+  const response = await fetch('/blockchain_tracker', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ network, address, plain: true })
+  });
+  const result = await response.text();
+  document.getElementById('blockchain-result').innerText = result;
+}
+
+async function scanVirusTotal() {
+  const filepath = document.getElementById('virustotal-filepath').value;
+  if (!filepath) { alert('Please enter a file path'); return; }
+  const response = await fetch('/virustotal_scan', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filepath, plain: true })
+  });
+  const result = await response.text();
+  document.getElementById('virustotal-result').innerText = result;
+}
+</script>
+
+</body>
+</html>
